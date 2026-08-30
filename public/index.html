@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BAATMEEDAR — The Gatekeeper of Truth</title>
+  <meta name="description" content="AI newsroom for inspectable factual claim verification. Classic Indian newspaper single-page application.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Passion+One:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="newspaper-page">
+    
+    <!-- TOP MASTHEAD & EARPIECES -->
+    <header class="masthead-container">
+      <div class="earpiece earpiece-left">
+        <div class="earpiece-line">VOL. II &bull; ISSUE NO. 14</div>
+        <div class="earpiece-line">EDITION: NATIONAL FACT DESK</div>
+        <div class="earpiece-line">PRICE: UNCOMPROMISING RIGOUR</div>
+      </div>
+
+      <div class="masthead-center">
+        <div class="masthead-kicker">THE INDEPENDENT FACT-CHECKING NEWSROOM</div>
+        <h1 class="masthead-title">BAATMEEDAR</h1>
+        <div class="masthead-tagline">THE GATEKEEPER OF TRUTH &bull; INSPECTABLE FACTUAL CLAIM VERIFICATION</div>
+      </div>
+
+      <div class="earpiece earpiece-right">
+        <div class="earpiece-line" id="live-date-display">SUNDAY, 30 AUGUST 2026</div>
+        <div class="earpiece-line">DESK: AI MULTI-AGENT CORPS</div>
+        <div class="earpiece-line system-status"><span class="status-indicator"></span> DESK ONLINE</div>
+      </div>
+    </header>
+
+    <!-- NEWSPAPER SECONDARY BAR -->
+    <div class="newspaper-subbar">
+      <div class="subbar-item"><strong>PROTOCOL:</strong> DUAL-BLIND ISOLATED EVALUATION</div>
+      <div class="subbar-item"><strong>MANDATE:</strong> NEVER MANUFACTURE CERTAINTY</div>
+      <div class="subbar-item">
+        <button class="text-link-btn" id="btn-toggle-archive">ARCHIVES &amp; PAST EDITIONS</button>
+      </div>
+    </div>
+
+    <!-- NEWSPAPER SECTION NAVIGATION BAR (DESK TABS) -->
+    <nav class="newspaper-navbar" aria-label="Newsroom Section Navigation">
+      <button class="nav-tab active" data-page="input" id="nav-tab-input">
+        <span class="tab-index">1.</span> NEW CHECK
+      </button>
+      <button class="nav-tab" data-page="progress" id="nav-tab-progress">
+        <span class="tab-index">2.</span> PROGRESS WIRE <span class="tab-badge pulse hidden" id="badge-wire-status">LIVE</span>
+      </button>
+      <button class="nav-tab" data-page="verdict" id="nav-tab-verdict">
+        <span class="tab-index">3.</span> FINAL VERDICT <span class="tab-badge primary-badge hidden" id="badge-verdict">LEAD</span>
+      </button>
+      <button class="nav-tab" data-page="claims" id="nav-tab-claims">
+        <span class="tab-index">4.</span> CLAIMS <span class="tab-count hidden" id="badge-claims-count">(0)</span>
+      </button>
+      <button class="nav-tab" data-page="evidence" id="nav-tab-evidence">
+        <span class="tab-index">5.</span> EVIDENCE <span class="tab-count hidden" id="badge-evidence-count">(0)</span>
+      </button>
+      <button class="nav-tab" data-page="grok" id="nav-tab-grok">
+        <span class="tab-index">6.</span> GROK DESK
+      </button>
+      <button class="nav-tab" data-page="gemini" id="nav-tab-gemini">
+        <span class="tab-index">7.</span> GEMINI DESK
+      </button>
+      <button class="nav-tab" data-page="raw" id="nav-tab-raw">
+        <span class="tab-index">8.</span> RAW &amp; TECH
+      </button>
+    </nav>
+
+    <!-- DOSSIER ACTIVE CONTEXT BANNER -->
+    <div id="dossier-context-bar" class="dossier-context-bar hidden">
+      <div class="dossier-context-left">
+        <span class="dossier-tag">ACTIVE DOSSIER:</span>
+        <span class="dossier-id" id="dossier-id-display">#—</span>
+        <span class="dossier-title" id="dossier-title-display">Untitled Dispatch</span>
+      </div>
+      <div class="dossier-context-right">
+        <span class="dossier-status-pill" id="dossier-status-display">STATUS: PENDING</span>
+        <button class="text-link-btn" id="btn-new-dispatch-quick">[ + NEW DISPATCH ]</button>
+      </div>
+    </div>
+
+    <!-- MAIN EDITORIAL CONTENT CONTAINER (PAGES) -->
+    <main class="editorial-main-content">
+
+      <!-- ===================================================================
+           PAGE 1: INPUT / NEW CHECK
+           =================================================================== -->
+      <section id="page-input" class="page-view active">
+        <div class="page-header-row">
+          <div>
+            <div class="page-kicker">EDITORIAL DISPATCH DESK &bull; STAGE 0</div>
+            <h2 class="page-title">Submit Proposition or Source for Verification</h2>
+          </div>
+          <div class="page-meta-tag">INTAKE TERMINAL</div>
+        </div>
+
+        <div class="input-desk-layout">
+          <!-- Main Form Column -->
+          <div class="input-form-col">
+            <div class="input-mode-tabs" role="tablist">
+              <button class="mode-tab active" id="tab-text" data-mode="TEXT">1. DIRECT STATEMENT</button>
+              <button class="mode-tab" id="tab-article" data-mode="ARTICLE">2. ARTICLE LINK</button>
+              <button class="mode-tab" id="tab-youtube" data-mode="YOUTUBE">3. YOUTUBE LINK</button>
+            </div>
+
+            <form id="verification-form" class="dispatch-form">
+              <div class="form-group" id="group-text">
+                <label for="input-text" class="input-label">STATEMENT OR PROPOSITION FOR VERIFICATION:</label>
+                <textarea id="input-text" name="input" rows="5" placeholder="Enter one or more factual claims or assertions to verify (e.g. 'The Reserve Bank of India maintained the repo rate at 6.5 percent during its Monetary Policy Committee meeting in August 2024.')." required></textarea>
+              </div>
+
+              <div class="form-group hidden" id="group-article">
+                <label for="input-article" class="input-label">ARTICLE URL TO EXTRACT AND VERIFY:</label>
+                <input type="url" id="input-article" placeholder="https://example.com/news-report-full-story">
+              </div>
+
+              <div class="form-group hidden" id="group-youtube">
+                <label for="input-youtube" class="input-label">YOUTUBE VIDEO URL FOR TRANSCRIPT VERIFICATION:</label>
+                <input type="url" id="input-youtube" placeholder="https://www.youtube.com/watch?v=...">
+              </div>
+
+              <!-- Quick Samples -->
+              <div class="samples-row">
+                <span class="samples-label">QUICK SAMPLE DISPATCHES:</span>
+                <button type="button" class="sample-btn" data-type="TEXT" data-text="The Reserve Bank of India maintained the repo rate at 6.5 percent during its Monetary Policy Committee meeting in August 2024.">RBI REPO RATE 2024</button>
+                <button type="button" class="sample-btn" data-type="TEXT" data-text="Chandrayaan-3 touched down on the lunar south pole on August 23, 2023, making India the first nation to land near the lunar south pole.">CHANDRAYAAN-3 MOON</button>
+                <button type="button" class="sample-btn" data-type="TEXT" data-text="Renewable energy accounted for over 40 percent of India's total installed power capacity by the end of 2023.">RENEWABLE ENERGY</button>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="dispatch-btn" id="btn-dispatch">
+                  DISPATCH TO NEWSROOM FOR VERIFICATION
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Editorial Manifesto Sidebar -->
+          <aside class="input-manifesto-sidebar">
+            <h3 class="manifesto-sidebar-head">NEWSROOM VERIFICATION PROTOCOL</h3>
+            <p class="manifesto-sidebar-text">
+              BAATMEEDAR evaluates factual propositions using strict isolation and primary sourcing.
+            </p>
+            <ul class="manifesto-sidebar-list">
+              <li><strong>Atomic Extraction:</strong> Every complex assertion is split into discrete verifiable claims.</li>
+              <li><strong>Authoritative Sourcing:</strong> Evidence is retrieved from primary records, official releases, and recognized newsrooms.</li>
+              <li><strong>Dual-Blind Deliberation:</strong> Evaluator models (Grok and Gemini) assess evidence independently without seeing each other's verdicts.</li>
+              <li><strong>Transparent Uncertainty:</strong> Any data gaps, time limits, or ambiguous terms are explicitly documented.</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           PAGE 2: PROGRESS / STAGE STATUS
+           =================================================================== -->
+      <section id="page-progress" class="page-view">
+        <div class="page-header-row">
+          <div>
+            <div class="page-kicker">NEWSROOM WIRE MONITOR &bull; REAL-TIME PROGRESS</div>
+            <h2 class="page-title">Live Pipeline Verification Progression</h2>
+          </div>
+          <div class="page-meta-tag" id="progress-job-tag">JOB: —</div>
+        </div>
+
+        <div class="progress-container">
+          <!-- 5 Stages Stepper -->
+          <div class="pipeline-stepper">
+            <div class="step-box" id="step-1">
+              <div class="step-num">STAGE 1</div>
+              <div class="step-name">SOURCE INGESTION</div>
+              <div class="step-status">QUEUED</div>
+            </div>
+            <div class="step-divider">&gt;&gt;</div>
+            <div class="step-box" id="step-2">
+              <div class="step-num">STAGE 2</div>
+              <div class="step-name">CLAIM EXTRACTION</div>
+              <div class="step-status">QUEUED</div>
+            </div>
+            <div class="step-divider">&gt;&gt;</div>
+            <div class="step-box" id="step-3">
+              <div class="step-num">STAGE 3</div>
+              <div class="step-name">RESEARCH &amp; EVIDENCE</div>
+              <div class="step-status">QUEUED</div>
+            </div>
+            <div class="step-divider">&gt;&gt;</div>
+            <div class="step-box" id="step-4">
+              <div class="step-num">STAGE 4</div>
+              <div class="step-name">DUAL-BLIND EVALUATION</div>
+              <div class="step-status">QUEUED</div>
+            </div>
+            <div class="step-divider">&gt;&gt;</div>
+            <div class="step-box" id="step-5">
+              <div class="step-num">STAGE 5</div>
+              <div class="step-name">EDITORIAL SYNTHESIS</div>
+              <div class="step-status">QUEUED</div>
+            </div>
+          </div>
+
+          <!-- Activity Log Feed -->
+          <div class="wire-status-card">
+            <div class="wire-status-head">CURRENT NEWSROOM WIRE STATUS</div>
+            <div class="live-activity-log" id="live-activity-text">
+              Newsroom idle. Dispatch a statement or link to begin verification.
+            </div>
+          </div>
+
+          <!-- Finished Action Banner -->
+          <div id="progress-complete-banner" class="progress-complete-banner hidden">
+            <div class="complete-banner-text">
+              <strong>EDITORIAL SYNTHESIS COMPLETE:</strong> All 5 verification stages have been published to the dossier.
+            </div>
+            <button class="dispatch-btn complete-btn" id="btn-jump-to-verdict">
+              VIEW FINAL VERDICT DOSSIER ↗
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           PAGE 3: FINAL VERDICT (MAIN RESULT PAGE)
+           =================================================================== -->
+      <section id="page-verdict" class="page-view">
+        <div class="page-header-row">
+          <div>
+            <div class="page-kicker">STAGE 5 &bull; MAIN EDITORIAL RESULT</div>
+            <h2 class="page-title">Final Editorial Verdict &amp; Synthesis</h2>
+          </div>
+          <div class="page-meta-tag">PUBLICATION DOSSIER</div>
+        </div>
+
+        <div id="page-verdict-content" class="verdict-page-content">
+          <!-- Populated dynamically via JS -->
+          <div class="placeholder-card">
+            <p>No verification dossier loaded. Submit a new check or inspect past editions via the Archives.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           PAGE 4: CLAIM BREAKDOWN
+           =================================================================== -->
+      <section id="page-claims" class="page-view">
+        <div class="page-header-row">
+          <div>
+            <div class="page-kicker">STAGE 2 &bull; FACTUAL DISSECTION</div>
+            <h2 class="page-title">Extracted Atomic Propositions &amp; Classification</h2>
+          </div>
+          <div class="page-meta-tag" id="claims-meta-count">0 PROPOSITIONS</div>
+        </div>
+
+        <div class="page-lead-note">
+          Complex statements are decomposed into verifiable atomic assertions. Each claim is classified for verifiability, time reference, named entities, and material scope.
+        </div>
+
+        <div id="page-claims-content" class="claims-list-container">
+          <!-- Populated dynamically via JS -->
+          <div class="placeholder-card">
+            <p>Awaiting claim extraction...</p>
+          </div>
+        </div>
+
+        <!-- Page Pagination / Jump Bar -->
+        <div class="page-footer-nav">
+          <button class="page-nav-link" data-page="verdict">&larr; Back to Final Verdict</button>
+          <button class="page-nav-link" data-page="evidence">Next: Evidence Sources &rarr;</button>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           PAGE 5: EVIDENCE SOURCES
+           =================================================================== -->
+      <section id="page-evidence" class="page-view">
+        <div class="page-header-row">
+          <div>
+            <div class="page-kicker">STAGE 3 &bull; INSPECTED CITATIONS &amp; EXCERPTS</div>
+            <h2 class="page-title">Sourced Primary Evidence &amp; Critique</h2>
+          </div>
+          <div class="page-meta-tag" id="evidence-meta-count">0 SOURCES</div>
+        </div>
+
+        <!-- Stance Filter Bar -->
+        <div class="evidence-filter-bar">
+          <span class="filter-label">FILTER BY STANCE:</span>
+          <button class="filter-btn active" data-filter="ALL">ALL SOURCES</button>
+          <button class="filter-btn" data-filter="SUPPORTS">SUPPORTING</button>
+          <button class="filter-btn" data-filter="CONTRADICTS">CONTRADICTING</button>
+          <button class="filter-btn" data-filter="INSUFFICIENT">INSUFFICIENT / CONTEXT</button>
+        </div>
+
+        <div id="page-evidence-content" class="evidence-list-container">
+          <!-- Populated dynamically via JS -->
+          <div class="placeholder-card">
+            <p>Awaiting evidence retrieval and inspection...</p>
+          </div>
+        </div>
+
+        <!-- Page Pagination / Jump Bar -->
+        <div class="page-footer-nav">
+          <button class="page-nav-link" data-page="claims">&larr; Back to Claim Breakdown</button>
+          <button class="page-nav-link" data-page="grok">Next: Grok Verification &rarr;</button>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           PAGE 6: GROK VERIFICATION
+           =================================================================== -->
+      <section id="page-grok" class="page-view">
+        <div class="page-header-row">
+          <div>
+            <div class="page-kicker">STAGE 4A &bull; INDEPENDENT EVALUATOR A</div>
+            <h2 class="page-title">Grok Fact Desk Deliberations</h2>
+          </div>
+          <div class="page-meta-tag">ISOLATED AUDIT</div>
+        </div>
+
+        <div class="page-lead-note">
+          Evaluator A operated under strict blind isolation. Deliberated purely over retrieved primary sources and propositions without access to other evaluator outputs.
+        </div>
+
+        <div id="page-grok-content" class="evaluator-dossier-container">
+          <!-- Populated dynamically via JS -->
+          <div class="placeholder-card">
+            <p>Awaiting Grok deliberation...</p>
+          </div>
+        </div>
+
+        <!-- Page Pagination / Jump Bar -->
+        <div class="page-footer-nav">
+          <button class="page-nav-link" data-page="evidence">&larr; Back to Evidence Sources</button>
+          <button class="page-nav-link" data-page="gemini">Next: Gemini Verification &rarr;</button>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           PAGE 7: GEMINI VERIFICATION
+           =================================================================== -->
+      <section id="page-gemini" class="page-view">
+        <div class="page-header-row">
+          <div>
+            <div class="page-kicker">STAGE 4B &bull; INDEPENDENT EVALUATOR B</div>
+            <h2 class="page-title">Gemini Fact Desk Deliberations</h2>
+          </div>
+          <div class="page-meta-tag">ISOLATED AUDIT</div>
+        </div>
+
+        <div class="page-lead-note">
+          Evaluator B operated under strict blind isolation. Deliberated purely over retrieved primary sources and propositions without access to other evaluator outputs.
+        </div>
+
+        <div id="page-gemini-content" class="evaluator-dossier-container">
+          <!-- Populated dynamically via JS -->
+          <div class="placeholder-card">
+            <p>Awaiting Gemini deliberation...</p>
+          </div>
+        </div>
+
+        <!-- Page Pagination / Jump Bar -->
+        <div class="page-footer-nav">
+          <button class="page-nav-link" data-page="grok">&larr; Back to Grok Desk</button>
+          <button class="page-nav-link" data-page="raw">Next: Raw Intake &amp; Technical Details &rarr;</button>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           PAGE 8: RAW INTAKE & TECHNICAL DETAILS
+           =================================================================== -->
+      <section id="page-raw" class="page-view">
+        <div class="page-header-row">
+          <div>
+            <div class="page-kicker">STAGE 1 &amp; AUDIT &bull; PROVENANCE &amp; TELEMETRY</div>
+            <h2 class="page-title">Raw Intake Record &amp; Technical Execution Logs</h2>
+          </div>
+          <div class="page-meta-tag">TECHNICAL DOSSIER</div>
+        </div>
+
+        <div id="page-raw-content" class="raw-page-container">
+          <!-- Populated dynamically via JS -->
+          <div class="placeholder-card">
+            <p>Awaiting intake records and execution logs...</p>
+          </div>
+        </div>
+
+        <!-- Page Pagination / Jump Bar -->
+        <div class="page-footer-nav">
+          <button class="page-nav-link" data-page="gemini">&larr; Back to Gemini Desk</button>
+          <button class="page-nav-link" data-page="verdict">Return to Final Verdict &rarr;</button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- PAST EDITIONS / ARCHIVES MODAL DRAWER -->
+    <section id="archives-panel" class="editorial-block archives-block hidden" aria-modal="true" role="dialog">
+      <div class="section-header">
+        <span class="section-kicker">NEWSROOM ARCHIVES &amp; RECENT EDITIONS</span>
+        <button class="text-close-btn" id="btn-close-archive">[ CLOSE ARCHIVE X ]</button>
+      </div>
+      <div id="archive-list-container">
+        <p class="empty-archive-note">Loading archived verifications from the records desk...</p>
+      </div>
+    </section>
+
+    <!-- NEWSPAPER FOOTER -->
+    <footer class="newspaper-footer">
+      <div class="footer-rule"></div>
+      <div class="footer-content">
+        <div class="footer-col">
+          <strong>BAATMEEDAR &bull; THE GATEKEEPER OF TRUTH</strong><br>
+          An Inspectable Multi-Agent AI Newsroom Protocol
+        </div>
+        <div class="footer-col text-center">
+          Printed on Digital Newsprint &bull; Sharp Broadsheet Standard<br>
+          Typography: Passion One &amp; Libre Franklin
+        </div>
+        <div class="footer-col text-right">
+          Strict Evidence First &bull; Zero Manufactured Certainty<br>
+          Dual Evaluators: Grok &bull; Gemini
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

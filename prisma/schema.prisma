@@ -1,0 +1,167 @@
+// BAATMEEDAR -- The Gatekeeper of Truth
+// Prisma Schema -- Complete 5-Stage Verification Data Model
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Check {
+  id               String      @id @default(cuid())
+  inputType        String
+  originalInput    String
+  status           String      @default("PENDING")
+  canonicalUrl     String?
+  videoId          String?
+  publisher        String?
+  sourceTitle      String?
+  retrievalTime    DateTime?
+  extractedText    String?
+  extractionStatus String?
+  language         String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  claims           Claim[]
+  apiUsageLogs     ApiUsageLog[]
+  cacheEntries     CacheEntry[]
+}
+
+model Claim {
+  id                String   @id @default(cuid())
+  checkId           String
+  check             Check    @relation(fields: [checkId], references: [id], onDelete: Cascade)
+
+  claimText         String
+  originalWording   String
+  domain            String?
+  namedEntities     String   @default("[]")
+  location          String?
+  timeReference     String?
+  timeSensitivity   String   @default("UNSPECIFIED")
+  materialContext   String?
+  ambiguityNotes    String?
+  importance        String   @default("MEDIUM")
+  isVerifiable      Boolean  @default(true)
+  status            String   @default("QUEUED")
+  claimOrder        Int
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  sources           Source[]
+  evidenceReviews   EvidenceReview[]
+  verifications     ModelVerification[]
+}
+
+model Source {
+  id                 String   @id @default(cuid())
+  claimId            String
+  claim              Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+
+  url                String
+  title              String?
+  publisher          String?
+  author             String?
+  sourceType         String   @default("NEWS")
+
+  searchSnippet      String?
+  relevantExcerpt    String?
+
+  stance             String?
+  relevance          String?
+  authorityRationale String?
+  credibilityNotes   String?
+
+  publicationDate    String?
+  retrievalDate      DateTime @default(now())
+
+  wasInspected       Boolean  @default(false)
+  inspectionFailed   Boolean  @default(false)
+
+  createdAt          DateTime @default(now())
+
+  evidenceReviews    EvidenceReview[]
+}
+
+model EvidenceReview {
+  id                   String   @id @default(cuid())
+  claimId              String
+  claim                Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+
+  reviewer             String
+  role                 String
+
+  missingContext       String?
+  logicalIssues        String?
+  counterevidence      String?
+  unansweredQuestions  String?
+
+  materialTerms        String?
+  ambiguityFlags       String?
+  scopeJudgement       String?
+
+  sourceIdsReviewed    String   @default("[]")
+  tokensUsed           Int?
+  createdAt            DateTime @default(now())
+
+  sources              Source[]
+}
+
+model ModelVerification {
+  id                  String   @id @default(cuid())
+  claimId             String
+  claim               Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+
+  modelName           String
+  verdict             String?
+
+  confidence          Float?
+  reasoning           String?
+  evidenceIdsUsed     String   @default("[]")
+  limitations         String?
+  unresolvedQuestions String?
+
+  promptHash          String?
+  rawResponse         String?
+  tokensUsed          Int?
+  createdAt           DateTime @default(now())
+
+  @@unique([claimId, modelName])
+}
+
+model CacheEntry {
+  id          String   @id @default(cuid())
+  cacheKey    String   @unique
+  cacheType   String
+  content     String
+  checkId     String?
+  check       Check?   @relation(fields: [checkId], references: [id])
+  fetchedAt   DateTime @default(now())
+  expiresAt   DateTime
+}
+
+model ApiUsageLog {
+  id            String   @id @default(cuid())
+  checkId       String?
+  check         Check?   @relation(fields: [checkId], references: [id])
+  claimId       String?
+
+  provider      String
+  endpoint      String
+  stage         Int?
+
+  tokensUsed    Int?
+  costEstimate  Float?
+  latencyMs     Int?
+
+  wasFromCache  Boolean  @default(false)
+  success       Boolean  @default(true)
+  errorMessage  String?
+
+  createdAt     DateTime @default(now())
+}
