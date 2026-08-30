@@ -2,6 +2,7 @@
 Build the database structure before writing heavy backend logic.
 Add caching early. This is where API savings begin.
 
+
 checks:
 - id
 - input_type: text/article/youtube
