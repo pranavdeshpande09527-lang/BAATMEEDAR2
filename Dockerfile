@@ -44,9 +44,10 @@ COPY --chown=baatmeedar:baatmeedar src ./src
 COPY --chown=baatmeedar:baatmeedar public ./public
 COPY --chown=baatmeedar:baatmeedar package.json ./
 
-# Set environment
+# Set environment — these become the defaults; Render/env overrides take precedence
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV LOG_LEVEL=info
 
 # Expose API port
 EXPOSE 3000
@@ -58,5 +59,6 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
 # Switch to non-root user
 USER baatmeedar
 
-# Apply pending DB migrations then start the server
-CMD ["sh", "-c", "npx prisma migrate deploy && node src/server.js"]
+# Apply pending DB migrations then start the server.
+# Explicitly pass NODE_ENV=production so pino never attempts pino-pretty transport.
+CMD ["sh", "-c", "NODE_ENV=production npx prisma migrate deploy && NODE_ENV=production node src/server.js"]
