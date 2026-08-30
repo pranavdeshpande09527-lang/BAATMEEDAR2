@@ -1,6 +1,7 @@
 'use strict';
 const prisma = require('../lib/prisma');
 const config = require('../config');
+const { logger } = require('../lib/logger');
 
 /**
  * ApiBudgetService — Enforces API spend limits and logs all model calls.
@@ -55,7 +56,7 @@ function deduplicateClaims(claims) {
       if (c.materialContext && !existing.materialContext?.includes(c.materialContext)) {
         existing.materialContext = `${existing.materialContext || ''}; ${c.materialContext}`.trim();
       }
-      console.log(`[ApiBudget] Merged duplicate claim: "${c.claimText}"`);
+      logger.debug({ claimText: c.claimText }, '[ApiBudget] Merged duplicate claim');
     } else {
       seen.set(norm, c);
       unique.push(c);
@@ -109,7 +110,7 @@ const COST_PER_1K_TOKENS = {
 function enforceClaims(claimsArray) {
   const max = config.budget.maxClaimsPerCheck;
   if (claimsArray.length > max) {
-    console.warn(`[ApiBudget] Capping ${claimsArray.length} claims to ${max}`);
+    logger.warn({ count: claimsArray.length, max }, '[ApiBudget] Capping claims');
     return claimsArray.slice(0, max);
   }
   return claimsArray;
@@ -118,7 +119,7 @@ function enforceClaims(claimsArray) {
 function enforceSearches(queries) {
   const max = config.budget.maxSearchesPerClaim;
   if (queries.length > max) {
-    console.warn(`[ApiBudget] Capping ${queries.length} queries to ${max}`);
+    logger.warn({ count: queries.length, max }, '[ApiBudget] Capping search queries');
     return queries.slice(0, max);
   }
   return queries;
@@ -127,7 +128,7 @@ function enforceSearches(queries) {
 function enforceSources(sources) {
   const max = config.budget.maxSourcesPerClaim;
   if (sources.length > max) {
-    console.warn(`[ApiBudget] Capping ${sources.length} sources to ${max}`);
+    logger.warn({ count: sources.length, max }, '[ApiBudget] Capping sources');
     return sources.slice(0, max);
   }
   return sources;
@@ -136,7 +137,7 @@ function enforceSources(sources) {
 function enforceContextLength(text) {
   const max = config.budget.maxModelContextChars;
   if (text.length > max) {
-    console.warn(`[ApiBudget] Truncating context from ${text.length} to ${max} chars`);
+    logger.warn({ originalLength: text.length, max }, '[ApiBudget] Truncating context');
     return text.slice(0, max);
   }
   return text;

@@ -30,8 +30,25 @@ function bool(key, fallback) {
 
 const config = {
   // ── Server ────────────────────────────────
-  port: num('PORT', 3000),
+  port:    num('PORT', 3000),
   nodeEnv: optional('NODE_ENV', 'development'),
+  isProduction: process.env.NODE_ENV === 'production',
+
+  // ── Logging ───────────────────────────────
+  logLevel: optional('LOG_LEVEL', process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
+
+  // ── CORS ─────────────────────────────────
+  // Comma-separated list of allowed origins; '*' to allow all (dev only)
+  allowedOrigins: optional('ALLOWED_ORIGINS', '*'),
+
+  // ── Rate Limiting ─────────────────────────
+  rateLimit: {
+    windowMs: num('RATE_LIMIT_WINDOW_MS', 60000), // 1 minute
+    max:      num('RATE_LIMIT_MAX', 30),           // 30 req/min per IP
+  },
+
+  // ── Pipeline ─────────────────────────────
+  pipelineTimeoutMs: num('PIPELINE_TIMEOUT_MS', 300000), // 5 minutes
 
   // ── Database ──────────────────────────────
   databaseUrl: required('DATABASE_URL'),

@@ -1,14 +1,30 @@
-# Dependencies
+# ─── Node.js ──────────────────────────────────────────────────────────────────
 node_modules/
 
-# Environment variables
+# ─── Environment variables ────────────────────────────────────────────────────
 .env
 .env.*
+!.env.example
 
-# Logs
-logs
+# ─── SQLite database files ────────────────────────────────────────────────────
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db-shm
+prisma/*.db-wal
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+logs/
 *.log
 npm-debug.log*
 
-# OS Files
+# ─── OS Files ─────────────────────────────────────────────────────────────────
 .DS_Store
+Thumbs.db
+
+# ─── Build outputs ────────────────────────────────────────────────────────────
+dist/
+build/

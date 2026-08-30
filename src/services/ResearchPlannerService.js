@@ -2,6 +2,7 @@
 const axios  = require('axios');
 const Budget = require('./ApiBudgetService');
 const config = require('../config');
+const { logger } = require('../lib/logger');
 
 /**
  * ResearchPlannerService — Stage 3a: Hermes research plan.
@@ -65,7 +66,7 @@ async function createResearchPlan(claim, checkId) {
     plan = JSON.parse(rawContent);
     tokensUsed = resp.data.usage?.total_tokens || Math.ceil(safeText.length / 4);
   } catch (err) {
-    console.error('[ResearchPlanner] Groq API error, falling back to Gemini:', err.message);
+    logger.error({ claimId: claim.id, err: err.message }, '[ResearchPlanner] Groq API error, falling back to Gemini');
 
     // Fallback: Gemini 3.5 Flash
     try {
@@ -80,7 +81,7 @@ async function createResearchPlan(claim, checkId) {
       plan = JSON.parse(gText);
       tokensUsed = gResp.data.usageMetadata?.totalTokenCount || 200;
     } catch (_gErr) {
-      console.error('[ResearchPlanner] Fallback plan used');
+      logger.error({ claimId: claim.id }, '[ResearchPlanner] Fallback plan used');
       plan = {
         researchQuestion: `Is it factually accurate that ${safeText}?`,
         factsToEstablish: ['Verify occurrence, date, and entities involved'],

@@ -4,6 +4,7 @@ const prisma  = require('../lib/prisma');
 const Budget  = require('./ApiBudgetService');
 const config  = require('../config');
 const crypto  = require('crypto');
+const { logger } = require('../lib/logger');
 
 // ── Safe JSON parser ─────────────────────────────────────────────────────────
 function safeParseJson(raw) {
@@ -150,7 +151,7 @@ async function _runGrokEvaluator(claim, evidencePacket, checkId) {
     if (!result) throw new Error('Failed to parse Grok evaluator JSON');
     tokensUsed = resp.data.usage?.total_tokens || 500;
   } catch (err) {
-    console.error('[Evaluator Grok] Call failed:', err.response?.data || err.message);
+    logger.error({ claimId: claim.id, err: err.response?.data || err.message }, '[Evaluator Grok] Call failed');
     result = {
       verdict: 'INCONCLUSIVE',
       confidence: 0.2,
@@ -212,7 +213,7 @@ async function _runGeminiEvaluator(claim, evidencePacket, checkId) {
     if (!result) throw new Error('Failed to parse Gemini evaluator JSON');
     tokensUsed = resp.data.usageMetadata?.totalTokenCount || 500;
   } catch (err) {
-    console.error('[Evaluator Gemini] Call failed:', err.response?.data || err.message);
+    logger.error({ claimId: claim.id, err: err.response?.data || err.message }, '[Evaluator Gemini] Call failed');
     result = {
       verdict: 'INCONCLUSIVE',
       confidence: 0.2,

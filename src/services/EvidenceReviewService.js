@@ -3,6 +3,7 @@ const axios   = require('axios');
 const prisma  = require('../lib/prisma');
 const Budget  = require('./ApiBudgetService');
 const config  = require('../config');
+const { logger } = require('../lib/logger');
 
 // ── Safe JSON parser ─────────────────────────────────────────────────────────
 // Gemini sometimes returns valid JSON followed by extra text, or truncated JSON.
@@ -82,7 +83,7 @@ async function reviewEvidence(claim, sources, checkId) {
   const sourceIds = sources.map(s => s.id);
 
   if (sources.length === 0) {
-    console.log(`[EvidenceReview] No sources found for claim: ${claim.id}`);
+    logger.info({ claimId: claim.id }, '[EvidenceReview] No sources found for claim');
     return { groqReview: null, geminiReview: null };
   }
 
@@ -127,7 +128,7 @@ async function _runGroqReview(claim, sources, sourceIds, checkId) {
     if (!result) throw new Error('Failed to parse Groq evidence review JSON');
     tokensUsed = resp.data.usage?.total_tokens || 400;
   } catch (err) {
-    console.error('[EvidenceReview] Groq review call failed:', err.response?.data || err.message);
+    logger.error({ claimId: claim.id, err: err.response?.data || err.message }, '[EvidenceReview] Groq review call failed');
     result = {
       missingContext: 'Inspection completed with fallback context analysis.',
       logicalIssues: null,
@@ -199,7 +200,7 @@ async function _runGeminiReview(claim, sources, sourceIds, checkId) {
     if (!result) throw new Error('Failed to parse Gemini evidence review JSON');
     tokensUsed = resp.data.usageMetadata?.totalTokenCount || 500;
   } catch (err) {
-    console.error('[EvidenceReview] Gemini scope review failed:', err.response?.data || err.message);
+    logger.error({ claimId: claim.id, err: err.response?.data || err.message }, '[EvidenceReview] Gemini scope review failed');
     // Do NOT fabricate SUPPORTS stances on failure — return a conservative fallback
     // that explicitly marks sources as un-inspected (wasInspected stays false).
     result = {
@@ -252,7 +253,7 @@ async function _runGeminiReview(claim, sources, sourceIds, checkId) {
           relevantExcerpt: ev.relevantExcerpt || undefined,
           relevance:       ev.relevanceRationale || undefined,
         },
-      }).catch(e => console.warn(`[EvidenceReview] Could not update source ${ev.sourceId}:`, e.message));
+      }).catch(e => logger.warn({ sourceId: ev.sourceId, err: e.message }, '[EvidenceReview] Could not update source'));
     }
   }
 

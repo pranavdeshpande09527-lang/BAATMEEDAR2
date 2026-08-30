@@ -5,6 +5,7 @@ const prisma  = require('../lib/prisma');
 const Cache   = require('./CacheService');
 const Budget  = require('./ApiBudgetService');
 const config  = require('../config');
+const { logger } = require('../lib/logger');
 
 /**
  * InputService — Stage 1: Input collection.
@@ -50,12 +51,13 @@ function extractYouTubeVideoId(input) {
 async function fetchYouTubeMetadata(videoId) {
   try {
     const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
-    const resp = await axios.get(oembedUrl, { timeout: 5000 });
+    const resp = await axios.get(oembedUrl, { timeout: 8000 });
     return {
       title: resp.data.title || null,
       channel: resp.data.author_name || null,
     };
-  } catch (_e) {
+  } catch (e) {
+    logger.warn({ videoId, err: e.message }, '[InputService] YouTube oEmbed fetch failed');
     return { title: null, channel: null };
   }
 }
@@ -184,7 +186,7 @@ async function processArticle(check, start) {
   } catch (err) {
     status = 'failed';
     text = '';
-    console.error(`[InputService] Failed to retrieve article from ${url}:`, err.message);
+    logger.error({ url, err: err.message }, '[InputService] Failed to retrieve article');
   }
 
   const latency = Date.now() - start;
@@ -282,7 +284,7 @@ async function processYouTube(check, start) {
     }
   } catch (err) {
     status = 'unavailable';
-    console.warn(`[InputService] Transcript unavailable for video ${videoId}:`, err.message);
+    logger.warn({ videoId, err: err.message }, '[InputService] Transcript unavailable');
   }
 
   const latency = Date.now() - start;

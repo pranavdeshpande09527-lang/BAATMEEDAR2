@@ -3,6 +3,7 @@ const axios   = require('axios');
 const prisma  = require('../lib/prisma');
 const Budget  = require('./ApiBudgetService');
 const config  = require('../config');
+const { logger } = require('../lib/logger');
 
 function safeParseJson(raw) {
   if (!raw || typeof raw !== 'string') return null;
@@ -83,7 +84,7 @@ async function extractClaims(checkId, text) {
 
     let parsed = safeParseJson(rawText);
     if (!parsed) {
-      console.warn('[ClaimExtraction] Failed to parse raw JSON, using empty claims.');
+      logger.warn({ checkId }, '[ClaimExtraction] Failed to parse raw JSON, using empty claims.');
       parsed = { claims: [] };
     }
 
@@ -93,7 +94,7 @@ async function extractClaims(checkId, text) {
       rawClaims = parsed.claims;
     }
   } catch (err) {
-    console.error('[ClaimExtraction] Gemini API call failed:', err.response?.data?.error?.message || err.message);
+    logger.error({ checkId, err: err.response?.data?.error?.message || err.message }, '[ClaimExtraction] Gemini API call failed');
     // Fallback if API fails or rate-limited: create single claim from raw input
     rawClaims = [{
       claimText: safeText.slice(0, 300),

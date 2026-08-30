@@ -4,6 +4,7 @@ const prisma  = require('../lib/prisma');
 const Cache   = require('./CacheService');
 const Budget  = require('./ApiBudgetService');
 const config  = require('../config');
+const { logger } = require('../lib/logger');
 
 /**
  * SearchService — Stage 3b: Tavily source discovery & evidence ingestion.
@@ -87,7 +88,7 @@ async function searchForClaim(claim, plan, checkId) {
         publishedDate: r.published_date || null,
       }));
     } catch (err) {
-      console.error(`[SearchService] Tavily search failed for query "${query}":`, err.response?.data || err.message);
+      logger.error({ claimId: claim.id, query, err: err.response?.data || err.message }, '[SearchService] Tavily search failed');
     }
 
     const latency = Date.now() - start;

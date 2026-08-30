@@ -1,8 +1,10 @@
 'use strict';
 const express = require('express');
-const { body, param, validationResult } = require('express-validator');
+const { body, param, query, validationResult } = require('express-validator');
 const prisma  = require('../lib/prisma');
 const config  = require('../config');
+const { logger } = require('../lib/logger');
+const { submitRateLimiter } = require('../middleware/rateLimiter');
 const PipelineService = require('../services/PipelineService');
 
 const router = express.Router();
@@ -38,6 +40,7 @@ function validate(req, res, next) {
 
 // ── POST /checks — Submit a new verification job ───────────────────────────
 router.post('/',
+  submitRateLimiter,
   body('inputType')
     .isIn(['TEXT', 'ARTICLE', 'YOUTUBE'])
     .withMessage('inputType must be TEXT, ARTICLE, or YOUTUBE'),
@@ -62,55 +65,73 @@ router.post('/',
 
       // Kick off the pipeline asynchronously (don't await)
       PipelineService.run(check.id).catch(err => {
-        console.error(`[Pipeline] check ${check.id} failed:`, err.message);
+        logger.error({ checkId: check.id, err }, 'Pipeline run failed');
       });
 
+      logger.info({ checkId: check.id, inputType }, 'Check submitted');
       res.status(202).json({
         checkId: check.id,
         status: check.status,
         message: 'Verification job accepted. Poll /checks/:id/status for progress.',
       });
     } catch (err) {
-      console.error('[POST /checks]', err);
+      logger.error({ err }, 'POST /checks failed');
       res.status(500).json({ error: 'Failed to create check' });
     }
   }
 );
 
-// ── GET /checks — List recent verification jobs ───────────────────────────
-router.get('/', async (req, res) => {
-  try {
-    const checks = await prisma.check.findMany({
-      take: 20,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        inputType: true,
-        originalInput: true,
-        sourceTitle: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-        claims: {
+// ── GET /checks — List recent verification jobs (paginated) ──────────────
+router.get('/',
+  query('page').optional().isInt({ min: 1 }).toInt().withMessage('page must be a positive integer'),
+  query('limit').optional().isInt({ min: 1, max: 100 }).toInt().withMessage('limit must be 1–100'),
+  validate,
+  async (req, res) => {
+    try {
+      const page  = req.query.page  || 1;
+      const limit = req.query.limit || 20;
+      const skip  = (page - 1) * limit;
+
+      const [checks, total] = await Promise.all([
+        prisma.check.findMany({
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' },
           select: {
             id: true,
-            claimText: true,
+            inputType: true,
+            originalInput: true,
+            sourceTitle: true,
             status: true,
-            isVerifiable: true,
+            createdAt: true,
+            updatedAt: true,
+            claims: {
+              select: {
+                id: true,
+                claimText: true,
+                status: true,
+                isVerifiable: true,
+              },
+            },
           },
-        },
-      },
-    });
-    res.json(checks);
-  } catch (err) {
-    console.error('[GET /checks]', err);
-    res.status(500).json({ error: 'Failed to fetch checks' });
+        }),
+        prisma.check.count(),
+      ]);
+
+      res.json({
+        data: checks,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      });
+    } catch (err) {
+      logger.error({ err }, 'GET /checks failed');
+      res.status(500).json({ error: 'Failed to fetch checks' });
+    }
   }
-});
+);
 
 // ── GET /checks/:id — Full check record ───────────────────────────────────
 router.get('/:id',
-  param('id').isString().trim(),
+  param('id').isString().trim().isLength({ min: 1, max: 64 }),
   validate,
   async (req, res) => {
     try {
@@ -132,7 +153,7 @@ router.get('/:id',
       if (!check) return res.status(404).json({ error: 'Check not found' });
       res.json(check);
     } catch (err) {
-      console.error('[GET /checks/:id]', err);
+      logger.error({ err, checkId: req.params.id }, 'GET /checks/:id failed');
       res.status(500).json({ error: 'Failed to fetch check' });
     }
   }
@@ -140,7 +161,7 @@ router.get('/:id',
 
 // ── GET /checks/:id/status — Lightweight status poll ─────────────────────
 router.get('/:id/status',
-  param('id').isString().trim(),
+  param('id').isString().trim().isLength({ min: 1, max: 64 }),
   validate,
   async (req, res) => {
     try {
@@ -156,7 +177,7 @@ router.get('/:id/status',
       if (!check) return res.status(404).json({ error: 'Check not found' });
       res.json(check);
     } catch (err) {
-      console.error('[GET /checks/:id/status]', err);
+      logger.error({ err, checkId: req.params.id }, 'GET /checks/:id/status failed');
       res.status(500).json({ error: 'Failed to fetch status' });
     }
   }
@@ -164,7 +185,7 @@ router.get('/:id/status',
 
 // ── GET /checks/:id/result — Final editorial result ───────────────────────
 router.get('/:id/result',
-  param('id').isString().trim(),
+  param('id').isString().trim().isLength({ min: 1, max: 64 }),
   validate,
   async (req, res) => {
     try {
@@ -199,7 +220,7 @@ router.get('/:id/result',
 
       res.json(check);
     } catch (err) {
-      console.error('[GET /checks/:id/result]', err);
+      logger.error({ err, checkId: req.params.id }, 'GET /checks/:id/result failed');
       res.status(500).json({ error: 'Failed to fetch result' });
     }
   }
